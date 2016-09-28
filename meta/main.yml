@@ -1,0 +1,179 @@
+---
+dependencies:
+  - role: debops.etc_services
+    tags: [ 'depend::etc_services', 'depend::etc_services:grafana', 'depend-of::grafana', 'type::dependency' ]
+    etc_services_dependent_list:
+      - name: 'grafana'
+        port: '{{ grafana_port }}'
+        comment: 'Grafana'
+
+  - role: debops.nginx
+    tags: [ 'depend::nginx', 'depend::nginx:grafana', 'depend-of::grafana', 'type::dependency' ]
+    nginx_servers: [ '{{ grafana_nginx_server }}' ]
+    nginx_upstreams: '{{ grafana_nginx_upstreams }}'
+    when: (grafana_dependencies|d(true, true))
+
+  - role: debops.mariadb
+    mariadb_databases:
+      - database: '{{ grafana_database_name }}'
+    mariadb_users:
+      - database: '{{ grafana_database_name }}'
+        user: '{{ grafana_database_user }}'
+        password: '{{ grafana_database_password }}'
+    when: (grafana_dependencies is defined and grafana_dependencies) and
+          (grafana_database is defined and grafana_database and grafana_database == 'mariadb')
+    tags: [ 'depend::mariadb', 'depend::mariadb:grafana', 'depend-of::grafana', 'type::dependency' ]
+
+  - role: debops.postgresql
+    postgresql_roles:
+      - name: '{{ grafana_database_name }}' # Separate role is needed when owncloud_database_name != owncloud_database_user
+      - name: '{{ grafana_database_user }}' # Password is not passed directly - it will be read for the file
+    postgresql_groups:
+      - roles: [ '{{ grafana_database_user }}' ]
+        groups: [ '{{ grafana_database_name }}' ]
+        database: '{{ grafana_database_name }}'
+        enabled: '{{ grafana_database_name != grafana_database_user }}'
+    postgresql_databases:
+      - name: '{{ grafana_database_name }}'
+        owner: '{{ grafana_database_user }}'
+    tags: [ 'depend::postgresql', 'depend::postgresql:grafana', 'depend-of::grafana', 'type::dependency' ]
+    when: (grafana_dependencies is defined and grafana_dependencies) and
+          (grafana_database is defined and grafana_database and grafana_database == 'postgresql')
+
+  # List your role dependencies here, one per line.
+  # Be sure to remove the '[]' above if you add dependencies
+  # to this list.
+galaxy_info:
+  author: your name
+  description: 
+  company: your company (optional)
+  # If the issue tracker for your role is not on github, uncomment the
+  # next line and provide a value
+  # issue_tracker_url: http://example.com/issue/tracker
+  # Some suggested licenses:
+  # - BSD (default)
+  # - MIT
+  # - GPLv2
+  # - GPLv3
+  # - Apache
+  # - CC-BY
+  license: license (GPLv2, CC-BY, etc)
+  min_ansible_version: 1.2
+  #
+  # Below are all platforms currently available. Just uncomment
+  # the ones that apply to your role. If you don't see your 
+  # platform on this list, let us know and we'll get it added!
+  #
+  #platforms:
+  #- name: EL
+  #  versions:
+  #  - all
+  #  - 5
+  #  - 6
+  #  - 7
+  #- name: GenericUNIX
+  #  versions:
+  #  - all
+  #  - any
+  #- name: Fedora
+  #  versions:
+  #  - all
+  #  - 16
+  #  - 17
+  #  - 18
+  #  - 19
+  #  - 20
+  #  - 21
+  #  - 22
+  #- name: Windows
+  #  versions:
+  #  - all
+  #  - 2012R2
+  #- name: SmartOS
+  #  versions:
+  #  - all
+  #  - any
+  #- name: opensuse
+  #  versions:
+  #  - all
+  #  - 12.1
+  #  - 12.2
+  #  - 12.3
+  #  - 13.1
+  #  - 13.2
+  #- name: Amazon
+  #  versions:
+  #  - all
+  #  - 2013.03
+  #  - 2013.09
+  #- name: GenericBSD
+  #  versions:
+  #  - all
+  #  - any
+  #- name: FreeBSD
+  #  versions:
+  #  - all
+  #  - 8.0
+  #  - 8.1
+  #  - 8.2
+  #  - 8.3
+  #  - 8.4
+  #  - 9.0
+  #  - 9.1
+  #  - 9.1
+  #  - 9.2
+  #- name: Ubuntu
+  #  versions:
+  #  - all
+  #  - lucid
+  #  - maverick
+  #  - natty
+  #  - oneiric
+  #  - precise
+  #  - quantal
+  #  - raring
+  #  - saucy
+  #  - trusty
+  #  - utopic
+  #  - vivid
+  #- name: SLES
+  #  versions:
+  #  - all
+  #  - 10SP3
+  #  - 10SP4
+  #  - 11
+  #  - 11SP1
+  #  - 11SP2
+  #  - 11SP3
+  #- name: GenericLinux
+  #  versions:
+  #  - all
+  #  - any
+  #- name: Debian
+  #  versions:
+  #  - all
+  #  - etch
+  #  - jessie
+  #  - lenny
+  #  - squeeze
+  #  - wheezy
+  #
+  # Below are all categories currently available. Just as with
+  # the platforms above, uncomment those that apply to your role.
+  #
+  #categories:
+  #- cloud
+  #- cloud:ec2
+  #- cloud:gce
+  #- cloud:rax
+  #- clustering
+  #- database
+  #- database:nosql
+  #- database:sql
+  #- development
+  #- monitoring
+  #- networking
+  #- packaging
+  #- system
+  #- web
+  

@@ -1,0 +1,17 @@
+---
+# vars file for debops.grafana
+grafana_nginx_upstreams:
+  - name: 'grafana'
+    enabled: true
+    server: '127.0.0.1:{{ grafana_port }}'
+
+grafana_nginx_server:
+  by_role: 'debops.gitlab'
+  enabled: True
+  name: '{{ grafana_domain }}'
+
+  location_list:
+    - pattern: '/'
+      options: |
+        proxy_pass http://grafana;
+

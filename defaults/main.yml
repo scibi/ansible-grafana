@@ -1,0 +1,57 @@
+---
+
+# .. envvar:: grafana_dependencies
+#
+# Should the ``debops.grafana`` role manage it's own dependencies (database, web server)?
+grafana_dependencies: True
+
+
+# .. envvar:: grafana_base_packages
+#
+# List of base packages required by Grafana.
+grafana_base_packages:
+  - 'grafana'
+
+
+# .. envvar:: grafana_apt_repo_base
+#
+# Base APT repository URL.
+grafana_apt_repo_base: 'https://packagecloud.io/grafana/'
+
+
+# .. envvar:: grafana_apt_repo_key_fingerprint
+#
+# GPG fingerprint for the public key used to sign the APT repository.
+grafana_apt_repo_key_fingerprint: '418A7F2FB0E1E6E7EABF6FE8C2E73424D59097AB'
+
+# .. envvar:: grafana_release
+#
+# stable or testing
+grafana_release: 'stable'
+
+grafana_port: 3000
+grafana_domain: [ '{{ ansible_fqdn }}' ]
+
+# Possible values:
+# - mysql
+# - postgresql
+# - sqlite3        
+grafana_database: 'postgresql'
+grafana_database_name: 'grafana'
+grafana_database_user: 'grafana'
+grafana_database_server: "{{ ansible_local[grafana_database].server }}"
+grafana_database_port: "{{ ansible_local[grafana_database].port }}"
+# .. envvar:: grafana_database_password_path
+#
+# Path to database password file.
+grafana_database_password_path: "{{ secret + '/' + grafana_database + '/' +
+                                    ansible_local[grafana_database].delegate_to }}{%
+                                      if grafana_database=='postgresql' %}/{{ ansible_local[grafana_database].port }}{% endif
+                                    %}{{ '/credentials/' + grafana_database_user +
+                                    '/password' }}"
+
+# .. envvar:: grafana_database_password
+#
+# Database password for GitLab.
+grafana_database_password: "{{ lookup('password', grafana_database_password_path + ' length=48') }}"
+
