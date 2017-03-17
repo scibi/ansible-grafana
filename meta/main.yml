@@ -1,44 +1,5 @@
 ---
-dependencies:
-  - role: debops.etc_services
-    tags: [ 'depend::etc_services', 'depend::etc_services:grafana', 'depend-of::grafana', 'type::dependency' ]
-    etc_services_dependent_list:
-      - name: 'grafana'
-        port: '{{ grafana_port }}'
-        comment: 'Grafana'
-
-  - role: debops.nginx
-    tags: [ 'depend::nginx', 'depend::nginx:grafana', 'depend-of::grafana', 'type::dependency' ]
-    nginx_servers: [ '{{ grafana_nginx_server }}' ]
-    nginx_upstreams: '{{ grafana_nginx_upstreams }}'
-    when: (grafana_dependencies|d(true, true))
-
-  - role: debops.mariadb
-    mariadb_databases:
-      - database: '{{ grafana_database_name }}'
-    mariadb_users:
-      - database: '{{ grafana_database_name }}'
-        user: '{{ grafana_database_user }}'
-        password: '{{ grafana_database_password }}'
-    when: (grafana_dependencies is defined and grafana_dependencies) and
-          (grafana_database is defined and grafana_database and grafana_database == 'mariadb')
-    tags: [ 'depend::mariadb', 'depend::mariadb:grafana', 'depend-of::grafana', 'type::dependency' ]
-
-  - role: debops.postgresql
-    postgresql_roles:
-      - name: '{{ grafana_database_name }}' # Separate role is needed when owncloud_database_name != owncloud_database_user
-      - name: '{{ grafana_database_user }}' # Password is not passed directly - it will be read for the file
-    postgresql_groups:
-      - roles: [ '{{ grafana_database_user }}' ]
-        groups: [ '{{ grafana_database_name }}' ]
-        database: '{{ grafana_database_name }}'
-        enabled: '{{ grafana_database_name != grafana_database_user }}'
-    postgresql_databases:
-      - name: '{{ grafana_database_name }}'
-        owner: '{{ grafana_database_user }}'
-    tags: [ 'depend::postgresql', 'depend::postgresql:grafana', 'depend-of::grafana', 'type::dependency' ]
-    when: (grafana_dependencies is defined and grafana_dependencies) and
-          (grafana_database is defined and grafana_database and grafana_database == 'postgresql')
+dependencies: []
 
   # List your role dependencies here, one per line.
   # Be sure to remove the '[]' above if you add dependencies

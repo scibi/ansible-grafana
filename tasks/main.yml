@@ -19,7 +19,7 @@
     state: 'present'
     install_recommends: False
   with_flattened:
-    - grafana_base_packages
+    - '{{ grafana_base_packages }}'
   tags: [ 'role::grafana:base_install' ]
 
 - name: Divert grafana.ini
